@@ -36,6 +36,21 @@ def generate_data(categories_dict, num_rows):
         size=num_rows,
         p=probabilities
     )
+
+    months = []
+    years = []
+
+    cur_month = 1
+    prev_cats = []
+    for cat in cats:
+        if cat in prev_cats or random.random() <.5:
+            cur_month += 1
+            prev_cats = []
+        else:
+            prev_cats.append(cat)
+
+        months.append(cur_month%12)
+        years.append(cur_month//12)
     
     # Генерация сумм
     amounts = [
