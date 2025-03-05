@@ -25,7 +25,16 @@ expense_categories = {
     'Обслуживание': {'weight': 5, 'min': 30000, 'max': 100000}
 }
 
-def generate_data(categories_dict, num_rows):
+expense_subcategories = [
+    'Азотное производство',
+    'Фосфорное производство',
+    'Калийное производство',
+    'Комплексное производство',
+    'Органическое производство',
+    'Универсальные'
+]
+
+def generate_data(categories_dict, subcategories, num_rows):
     # Нормализация весов
     total_weight = sum(cat['weight'] for cat in categories_dict.values())
     probabilities = [cat['weight']/total_weight for cat in categories_dict.values()]
@@ -37,18 +46,27 @@ def generate_data(categories_dict, num_rows):
         p=probabilities
     )
 
+    # Генерация подкатегорий
+    if subcategories:
+        subcats = np.random.choice(
+            subcategories,
+            size=num_rows
+        )
+    else:
+        subcats = cats
+
     # Генерация временных меток (месяц, год)
     months = []
     years = []
 
     cur_month = 0
     prev_cats = []
-    for cat in cats:
-        if cat in prev_cats or random.random() <.5:
+    for cat, subcat in zip(cats, subcats):
+        if [cat, subcat] in prev_cats or random.random() <.5:
             cur_month += 1
             prev_cats = []
         else:
-            prev_cats.append(cat)
+            prev_cats.append([cat, subcat])
 
         months.append(1+cur_month%12)
         years.append(2000+cur_month//12)
@@ -60,18 +78,30 @@ def generate_data(categories_dict, num_rows):
             categories_dict[cat]['max']
         ) for cat in cats
     ]
-    
-    return pd.DataFrame({
-        'Сумма': amounts,
-        'Категория': cats,
-        'Месяц': months,
-        'Год': years
-    })
+
+    if subcategories:
+        return pd.DataFrame({
+            'Сумма': amounts,
+            'Категория': cats,
+            'Подкатегория': subcats,
+            'Месяц': months,
+            'Год': years
+        })
+    else:
+        return pd.DataFrame({
+            'Сумма': amounts,
+            'Категория': cats,
+            'Месяц': months,
+            'Год': years
+        })
 
 # Генерация данных
-df_income = generate_data(income_categories, NUM_ROWS)
-df_expense = generate_data(expense_categories, NUM_ROWS)
+df_income = generate_data(income_categories, None, NUM_ROWS)
+df_expense = generate_data(expense_categories, expense_subcategories, NUM_ROWS)
 
-# Сохранение в разные файлы
-df_income.to_excel('доходы.xlsx', sheet_name='Доходы', index=False)
-df_expense.to_excel('расходы.xlsx', sheet_name='Расходы', index=False)
+print(df_income)
+print(df_expense)
+
+# # Сохранение в разные файлы
+# df_income.to_excel('доходы.xlsx', sheet_name='Доходы', index=False)
+# df_expense.to_excel('расходы.xlsx', sheet_name='Расходы', index=False)
