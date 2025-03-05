@@ -102,6 +102,6 @@ df_expense = generate_data(expense_categories, expense_subcategories, NUM_ROWS)
 print(df_income)
 print(df_expense)
 
-# # Сохранение в разные файлы
-# df_income.to_excel('доходы.xlsx', sheet_name='Доходы', index=False)
-# df_expense.to_excel('расходы.xlsx', sheet_name='Расходы', index=False)
+# Сохранение в разные файлы
+df_income.to_excel('доходы.xlsx', sheet_name='Доходы', index=False)
+df_expense.to_excel('расходы.xlsx', sheet_name='Расходы', index=False)
