@@ -54,7 +54,6 @@ def generate_data(categories_dict, num_rows):
 df_income = generate_data(income_categories, NUM_ROWS)
 df_expense = generate_data(expense_categories, NUM_ROWS)
 
-# Сохранение в Excel
-with pd.ExcelWriter('отчет_завода_удобрений.xlsx') as writer:
-    df_income.to_excel(writer, sheet_name='Доходы', index=False)
-    df_expense.to_excel(writer, sheet_name='Расходы', index=False)
+# Сохранение в разные файлы
+df_income.to_excel('доходы.xlsx', sheet_name='Доходы', index=False)
+df_expense.to_excel('расходы.xlsx', sheet_name='Расходы', index=False)
