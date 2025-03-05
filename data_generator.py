@@ -37,10 +37,11 @@ def generate_data(categories_dict, num_rows):
         p=probabilities
     )
 
+    # Генерация временных меток (месяц, год)
     months = []
     years = []
 
-    cur_month = 1
+    cur_month = 0
     prev_cats = []
     for cat in cats:
         if cat in prev_cats or random.random() <.5:
@@ -49,8 +50,8 @@ def generate_data(categories_dict, num_rows):
         else:
             prev_cats.append(cat)
 
-        months.append(cur_month%12)
-        years.append(cur_month//12)
+        months.append(1+cur_month%12)
+        years.append(2000+cur_month//12)
     
     # Генерация сумм
     amounts = [
@@ -62,7 +63,9 @@ def generate_data(categories_dict, num_rows):
     
     return pd.DataFrame({
         'Сумма': amounts,
-        'Категория': cats
+        'Категория': cats,
+        'Месяц': months,
+        'Год': years
     })
 
 # Генерация данных
