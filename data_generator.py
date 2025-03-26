@@ -40,8 +40,11 @@ expense_subcategories = [
     'Органические удобрения'
 ]
 
-quarters = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
-
+def get_quarter_by_month(m):
+    quarters = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
+    for i in range(len(quarters)):
+        if m in quarters[i]:
+            return i+1
 
 def generate_data(categories_dict, subcategories, num_rows):
     # Нормализация весов
@@ -85,36 +88,119 @@ def generate_data(categories_dict, subcategories, num_rows):
 
     for year, month in generate_date_ranges(start_date, end_date):
         # income generation
-        for i in random.choice([0, 1, 1, 1, 2, 2, 2, 2, 3, 4]):
-            cat = random.choice([*income_categories])
-            income_amount = random.randint(
-                income_categories[cat]['min'],
-                income_categories[cat]['max']
-            )
 
-    # Генерация временных меток (месяц, год)
-    months = []
-    years = []
+        # adding every category if it's the last month of a quarter
+        if month == 3*get_quarter_by_month(month):
+            for cat in [*income_categories]:
+                if cat in cur_quarter_income_cats:
+                    continue
+                income_amount = random.randint(
+                    income_categories[cat]['min'],
+                    income_categories[cat]['max']
+                )
 
-    cur_month = 0
-    prev_cats = []
-    for cat, subcat in zip(cats, subcats):
-        if [cat, subcat] in prev_cats or random.random() < .5:
-            cur_month += 1
-            prev_cats = []
+                income_data['Сумма'].append(income_amount)
+                income_data['Категория'].append(cat)
+                income_data['Год'].append(year)
+                income_data['Месяц'].append(month)
+
+                cur_quarter_income_cats = []
         else:
-            prev_cats.append([cat, subcat])
+            for i in range(random.choice([0, 1, 1, 1, 2, 2, 2, 2, 3, 4])):
+                cat = [*income_categories][-1]
+                cat_selector = random.randrange(0, 100)
+                s = 0
+                for _ in range(len([*income_categories])):
+                    s += income_categories[[*income_categories][_]]['weight']
+                    if cat_selector <= s:
+                        cat = [*income_categories][_]
+                cur_quarter_income_cats.append(cat)
 
-        months.append(1 + cur_month % 12)
-        years.append(2000 + cur_month // 12)
+                income_amount = random.randint(
+                    income_categories[cat]['min'],
+                    income_categories[cat]['max']
+                )
 
-    # Генерация сумм
-    amounts = [
-        random.randint(
-            categories_dict[cat]['min'],
-            categories_dict[cat]['max']
-        ) for cat in cats
-    ]
+                income_data['Сумма'].append(income_amount)
+                income_data['Категория'].append(cat)
+                income_data['Год'].append(year)
+                income_data['Месяц'].append(month)
+
+        # expense generation
+
+        # adding every category if it's the last month of a quarter
+        if month == 3 * get_quarter_by_month(month):
+            for subcat in [*expense_subcategories]:
+                if subcat in cur_quarter_expenses_cats:
+                    continue
+
+                cat = [*expense_categories][-1]
+                cat_selector = random.randrange(0, 100)
+                s = 0
+                for _ in range(len([*expense_categories])):
+                    s += expense_categories[[*expense_categories][_]]['weight']
+                    if cat_selector <= s:
+                        cat = [*expense_categories][_]
+
+                expense_amount = random.randint(
+                    expense_categories[cat]['min'],
+                    expense_categories[cat]['max']
+                )
+
+                expenses_data['Сумма'].append(expense_amount)
+                expenses_data['Категория'].append(subcat)
+                expenses_data['Подкатегория '].append(cat)
+                expenses_data['Год'].append(year)
+                expenses_data['Месяц'].append(month)
+        else:
+            for i in range(random.choice([0, 1, 1, 1, 2, 2, 2, 2, 3, 4])):
+                cat = [*expense_categories][-1]
+                cat_selector = random.randrange(0, 100)
+                s = 0
+                for _ in range(len([*expense_categories])):
+                    s += expense_categories[[*expense_categories][_]]['weight']
+                    if cat_selector <= s:
+                        cat = [*expense_categories][_]
+
+                subcat = random.choice(expense_subcategories)
+                cur_quarter_expenses_cats.append(subcat)
+
+                expense_amount = random.randint(
+                    expense_categories[cat]['min'],
+                    expense_categories[cat]['max']
+                )
+
+                expenses_data['Сумма'].append(expense_amount)
+                expenses_data['Категория'].append(subcat)
+                expenses_data['Подкатегория '].append(cat)
+                expenses_data['Год'].append(year)
+                expenses_data['Месяц'].append(month)
+
+
+
+    # # Генерация временных меток (месяц, год)
+    # months = []
+    # years = []
+    #
+    # cur_month = 0
+    # prev_cats = []
+    # for cat, subcat in zip(cats, subcats):
+    #     if [cat, subcat] in prev_cats or random.random() < .5:
+    #         cur_month += 1
+    #         prev_cats = []
+    #     else:
+    #         prev_cats.append([cat, subcat])
+    #
+    #     months.append(1 + cur_month % 12)
+    #     years.append(2000 + cur_month // 12)
+    #
+    # # Генерация сумм
+    # amounts = [
+    #     random.randint(
+    #         categories_dict[cat]['min'],
+    #         categories_dict[cat]['max']
+    #     ) for cat in cats
+    # ]
 
     if subcategories:
         return pd.DataFrame({
